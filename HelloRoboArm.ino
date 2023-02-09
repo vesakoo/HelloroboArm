@@ -6,16 +6,29 @@
 #include "SSID.h"
 #include <ArduinoHttpClient.h>
 
-//char server[] = "robo.sukelluspaikka.fi";
+#include "ArduinoLowPower.h"
 
+#define SLEEP_10S_AFTER 180000ul
+#define SLEEP_15S_AFTER 300000ul
+#define SLEEP_30S_AFTER 600000ul
+#define SLEEP_60S_AFTER 1800000ul
+#define SLEEP_120S_AFTER 3600000ul
+
+
+
+
+//char server[] = "robo.sukelluspaikka.fi";
 IPAddress server(192,168,32,87); 
-char deviceId [] = "cda-dca-abc";
 WiFiClient cli;
 HttpClient client = HttpClient(cli,server,3002);
 int status = WL_IDLE_STATUS;
 //char  actions[][];
 int actionNum=0;
 bool seqEndReported = false;
+//last Runtime for deep sleep:
+char deviceId [] = "cda-dca-abc";
+unsigned long lastRunTime =0l;
+unsigned long lastSleepTime =0l;
 
 
 const byte STNDBY=9;
@@ -23,46 +36,57 @@ const byte STNDBY=9;
 const byte a_INA1=8;
 const byte a_INA2=7;
 const byte a_PWMA=6;
-const int aA_max=1000;
-const int aA_min=-1000;
+const int aA_max=2800;
+const int aA_min=-2800;
 //elbow
 const byte a_INB1=14;
 const byte a_INB2=13;
 const byte a_PWMB=10;
-const int aB_max=1000;
-const int aB_min=-1000;
+const int aB_max=7800;
+const int aB_min=-7800;
 
 
 //shoulder-updown
 const byte b_INA1=21;
 const byte b_INA2=20;
 const byte b_PWMA=19;
-const int bA_max=1000;
-const int bA_min=-1000;
+const int bA_max=4800;
+const int bA_min=-4800;
 //shoulder-rotate
 const byte b_INB1=16;
 const byte b_INB2=17;
 const byte b_PWMB=18;
-const int bB_max=1000;
-const int bB_min=-1000;
+const int bB_max=4000;
+const int bB_min=-4000;
 
 
 //pihti
 const byte c_INA1=3;
 const byte c_INA2=4;
 const byte c_PWMA=5;
-const int cA_max=1000;
-const int cA_min=-1000;
+const int cA_max=1200;
+const int cA_min=-1200;
+
+
+/*const byte c_INB1=2;
+const byte c_INB2=1;
+const byte c_PWMB=0;
+const int cB_max=1000;
+const int cB_min=-1000;*/
 
 //valo
-const byte c_INB1=2;
-const byte c_INB2=1;
-int c_PWMB=0;
+//const byte c_INA1=3;
+//const byte c_INA2=4;
+//int c_PWMA=5;
+const byte SPOT=2;
 
 
 //int motorpos[]={0,0,0,0,0,0};
 enum mposindex {
   PINPWM=0,DURPOS=1,PINM1=2,PINM2=3,BOUNDMIN=4,BOUNDMAX=5
+};
+enum jointindex {
+  WRIST=0,ELBOW=1,SHOULDER=2,SHOULDERROT=3,PINCH=4
 };
 int motorpos[5][6] ={
   {a_PWMA,0,a_INA1,a_INA2,aA_min,aA_max},
@@ -118,8 +142,8 @@ void test(){
   motorLoop(b_INB1,b_INB2,b_PWMB,false);
   //pihti
   motorLoop(c_INA1,c_INA2,c_PWMA,false);
-  //valo
-  motorLoop(c_INB1,c_INB2,c_PWMB,false);
+  //pihti
+  //motorLoop(c_INB1,c_INB2,c_PWMB,false);
 }
 
 void setupWifi(){
@@ -201,9 +225,61 @@ void motorRun( byte pin1,byte pin2,byte pwmpin, int dur){
   digitalWrite(pin1,LOW);
   digitalWrite(pin2,LOW);
   digitalWrite(STNDBY,LOW);
+  lastRunTime = millis();
 }
-void lightning(bool on){
 
+void multiMotorRun(int durShldRot,int durShld,int durElb,int durWrist,int durPinch){
+
+  durShldRot = checkDur(durShldRot,motorpos[SHOULDERROT][PINPWM]);
+  durShld = checkDur(durShld,motorpos[SHOULDER][PINPWM]);
+  durElb = checkDur(durElb,motorpos[ELBOW][PINPWM]);
+  durWrist = checkDur(durWrist,motorpos[WRIST][PINPWM]);
+  durPinch = checkDur(durPinch,motorpos[PINCH][PINPWM]);
+  //must have same order than motorMatrix
+  long ordered [5] ={durWrist,durElb,durShld,durShldRot,durPinch};
+  bool someRunning[5] ={false};
+  digitalWrite(STNDBY,HIGH);
+  for (int i = 0; i < 5; i++){
+    if(ordered[i]<0){
+      digitalWrite(motorpos[i][PINM1],LOW);
+      digitalWrite(motorpos[i][PINM2],HIGH);
+      ordered[i] =  ordered[i] * -1;
+    }else{
+      digitalWrite(motorpos[i][PINM1],HIGH);
+      digitalWrite(motorpos[i][PINM2],LOW); 
+    }
+    someRunning[i]=ordered[i] > 0;
+  }
+  long timeStart = millis();
+  for (int i = 0; i < 5; i++){
+    if(someRunning[i]){
+      analogWrite(motorpos[i][PINPWM],150);
+    }
+  }
+  boolean shouldStop = false;
+  while(someRunning[0]|| someRunning[1] || someRunning[2] ||someRunning[3]||someRunning[4]){
+    for (int i = 0; i < 5; i++){
+      if(millis() > timeStart + ordered[i]){
+        analogWrite(motorpos[i][PINPWM],0);
+        someRunning[i] =false;
+      }
+    }
+  }
+  //set all low
+  for (int i = 0; i < 5; i++){
+    digitalWrite(motorpos[i][PINM1],LOW);
+    digitalWrite(motorpos[i][PINM2],LOW); 
+  }
+  digitalWrite(STNDBY,LOW);
+}
+
+void lightning(bool on){
+  if(on){
+    analogWrite(SPOT,155);
+  }else{
+    analogWrite(SPOT,0);
+  }
+  lastRunTime = millis(); 
 }
 
 void motorsHoming(){
@@ -212,6 +288,13 @@ void motorsHoming(){
       motorRun(motorpos[i][2],motorpos[i][3],motorpos[i][0],mPos);
 
     }
+}
+
+//low power interrupt
+void dummy() {
+  // This function will be called once on device wakeup
+  // You can do some little operations here (like changing variables which will be used in the loop)
+  // Remember to avoid calling delay() and long running functions since this functions executes in interrupt context
 }
 
 
@@ -234,13 +317,14 @@ void setup() {
 
   pinMode(c_INA1,OUTPUT);
   pinMode(c_INA2,OUTPUT);
-  pinMode(c_INB1,OUTPUT);
-  pinMode(c_INB2,OUTPUT);
+  //pinMode(c_INB1,OUTPUT);
+  //pinMode(c_INB2,OUTPUT);
   pinMode(c_PWMA,OUTPUT);
-  pinMode(c_PWMB,OUTPUT);
+  //pinMode(c_PWMB,OUTPUT);
 
   pinMode(STNDBY,OUTPUT);
   setupWifi();
+  // LowPower.attachInterruptWakeup(RTC_ALARM_WAKEUP, dummy, CHANGE);
   //motorRun(a_INA1,)
   //test();
   
@@ -254,6 +338,7 @@ void loop() {
   client.get(s);
   int statusCode = client.responseStatusCode();
   String action = client.responseBody();
+  //WiFi.lowPowerMode();
   //send =false;
   Serial.println("<Loop Action is:" +action +">");
   int str_len = action.length() + 1; 
@@ -267,61 +352,78 @@ void loop() {
   //bool  wrist = false;
   //bool pinch = false;
   //bool unpinch = false;
-  bool runMotors = false;
+  ushort runMotors = 0;
   int dur =0,pin1=0,pin2=0,pinpwm=0;
-
+  int shlDur=0,shlRotDur=0,elbDur=0,wristDur=0,pinchDur=0;
   while (ptr) {
     if(strcmp(ptr,"shoulder")==0){
       ptr = strtok(NULL, "/");
       if(strcmp(ptr,"rotate")==0){
         //shoulderrot=true;
-        runMotors=true;
+        runMotors++;
         pin1=b_INB1;
         pin2=b_INB2;
         pinpwm=b_PWMB;
+        ptr = strtok(NULL, "/");
+        dur =atoi(ptr);
+        shlRotDur=atoi(ptr);
       }else if(strcmp(ptr,"updown")==0){
         //shoulderupdown=true;
-        runMotors=true;
+        runMotors++;
         pin1=b_INA1;
         pin2=b_INA2;
         pinpwm=b_PWMA;
+        ptr = strtok(NULL, "/");
+        dur =atoi(ptr);
+        shlDur=atoi(ptr);
       }
     }else if(strcmp(ptr,"elbow")==0){
       //elbow=true;
-      runMotors=true;
+      runMotors++;
       pin1=a_INB1;
       pin2=a_INB2;
       pinpwm=a_PWMB;
-
+      ptr = strtok(NULL, "/");
+      dur =atoi(ptr);
+      elbDur=atoi(ptr);
     }else if(strcmp(ptr,"wrist")==0){
       //wrist=true;
-      runMotors=true;
+      runMotors++;
       pin1=a_INA1;
       pin2=a_INA2;
       pinpwm=a_PWMA;
-
+      ptr = strtok(NULL, "/");
+      dur =atoi(ptr);
+      wristDur=atoi(ptr);
     }else if (strcmp(ptr,"pinch")==0){
       //pinch=true;
-      runMotors=true;
+      runMotors++;
       pin1=c_INA1;
       pin2=c_INA2;
       pinpwm=c_PWMA;
-    }
-    ptr = strtok(NULL, "/");
-    dur =atoi(ptr);
-    break;
+      ptr = strtok(NULL, "/");
+      dur =atoi(ptr);
+      pinchDur=atoi(ptr);
+    }else if (strcmp(ptr,"light")==0){
+      ptr = strtok(NULL, "/");
+      lightning(strcmp(ptr,"on") == 0); 
+    } 
+    ptr = strtok(NULL, "/"); 
+    //break;
   }
   if(pinpwm != 0){
-    motorRun(pin1,pin2,pinpwm,dur);
+    if(runMotors>1){
+      multiMotorRun(shlRotDur,shlDur,elbDur,wristDur,pinchDur);
+    }else{
+      motorRun(pin1,pin2,pinpwm,dur);
+    }
   }
   if(action.endsWith("/seq/end")){
     log("sequence end catched!");
     if(!seqEndReported){
         postSeqEnd();
-        //manualMode=false;
         seqEndReported = true;
         actionNum =0;
-      //}
     }
   }else{
     action ="";
@@ -331,7 +433,38 @@ void loop() {
     //actionNum = manualMode?actionNum:0;
   }
 
+    //if seq/end many times, goto sleep for a while
+    unsigned long now = millis();
+    /*if(now<lastSleepTime){
+      now = lastSleepTime+now;
+    }
+    if (now > lastRunTime + SLEEP_120S_AFTER ){
+     log("LOW POWER 120S");
+     lastSleepTime =now +120000;
+     LowPower.sleep(120000);
+     lastRunTime = now - SLEEP_120S_AFTER; 
+    }
+    else if(now > lastRunTime + SLEEP_60S_AFTER  ){
+      log("LOW POWER 60S");
+      lastSleepTime =now +60000;
+      LowPower.sleep(60000);
+    }
+    else if(now > lastRunTime + SLEEP_30S_AFTER  ){
+      log("LOW POWER 30S");
+      lastSleepTime =now + 30000;
+      LowPower.sleep(30000);
+    }
+    else if(now > lastRunTime + SLEEP_15S_AFTER  ){
+      log("LOW POWER 15S");
+      lastSleepTime =now +15000;
+      LowPower.sleep(15000);
+    }
+    else if(now > lastRunTime + SLEEP_10S_AFTER  ){
+      log("LOW POWER 10S");
+      lastSleepTime =now + 10000;
+      LowPower.sleep(10000);
 
+    }*/
   
 
 }
