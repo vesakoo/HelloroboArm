@@ -33,5 +33,9 @@ Server should responce with one of these actions (text/plain):
 
 ```
 
- server sould 
+Or with their combinations to run move several joints at the same time:
 
+```
+/shoulder/rotate/1000/elbow/1000/wrist/1000/pinch/1000
+
+```
