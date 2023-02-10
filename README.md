@@ -5,18 +5,18 @@
 Requirements:   
 
 -Arduino MKR 1010 wifi   
--OWI-35 robot arm
--POLOLU-713 2x1A 4,5-13,5V TB6612FNG Dual Motor Driver Carrier x 3 (or similar) 
+-OWI-35 robot arm   
+-POLOLU-713 2x1A 4,5-13,5V TB6612FNG Dual Motor Driver Carrier x 3 (or similar)   
 -Library:  WiFiNINA, NewPing, ArduinoHttpClient, SPI   
 
 
    
 Add SSID.h with your ssid information:   
 
+```
 #define SSID      "Your gateway id"   
-
 #define KEY       "Your gateway WPA pass"   
-
+```
 
 
 Based on  [OWI-535 building kit](https://owirobot.com/robotic-arm-edge/)   
