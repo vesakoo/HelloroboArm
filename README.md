@@ -1,16 +1,15 @@
 # HelloroboArm
 
+![RoboArm image](http://robo.sukelluspaikka.fi/images/RoboArm.jpg)
+
+
 Based on  [OWI-535 building kit](https://owirobot.com/robotic-arm-edge/)   
     with 5 small dc motors and grearing trains, having total 4 degrees on freedom:   
-- gripper open and close   
-- wrist up and down 120°  
-- elbow up/down 300°  
-- shoulder rotation 270°  
-- shoulder base 180°  
-- gripper spot light  
-- horizontal reach  32 cm  
-- vertical reach 38 cm  
-- 100g lifting capacity  
+- gripper open and close  (api limits range between -1200...1200, home position 0)  
+- wrist up and down 120°  (api limits range between -2800...2800, home position 0)  
+- elbow up/down 300°  (api limits range between -7800...7800, home position 0)  
+- shoulder rotation 270°  (api limits range between -4000...4000, home position 0) 
+- shoulder base 180°  (api limits range between -4800...4800, home position 0)  
 
 Each motor keeps track about it's previous movements trying to avoid a joint running ower it's allowed range of motion.
 motion trackking is based on duration in milliseconds moved away from upright position (0-pos), where down and ccw are consideres as negative milliseconds.  
