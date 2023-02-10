@@ -2,6 +2,22 @@
 
 ![RoboArm image](http://robo.sukelluspaikka.fi/images/RoboArm.jpg)
 
+Requirements:   
+
+-Arduino MKR 1010 wifi   
+-OWI-35 robot arm
+-POLOLU-713 2x1A 4,5-13,5V TB6612FNG Dual Motor Driver Carrier x 3 (or similar) 
+-Library:  WiFiNINA, NewPing, ArduinoHttpClient, SPI   
+
+
+   
+Add SSID.h with your ssid information:   
+
+#define SSID      "Your gateway id"   
+
+#define KEY       "Your gateway WPA pass"   
+
+
 
 Based on  [OWI-535 building kit](https://owirobot.com/robotic-arm-edge/)   
     with 5 small dc motors and grearing trains, having total 4 degrees on freedom:   
@@ -17,7 +33,7 @@ after each execution que, the robot arm will return to it's homing position.
 
 It is a sand box implementation, operating in a single room. It simulates Robot network collaborational functions".
 
-## How to send commands
+## How to communicate with robot
 
 Robot is sending http get requests to webserver 
 ```
