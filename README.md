@@ -2,7 +2,7 @@
 
 ![RoboArm image](http://robo.sukelluspaikka.fi/images/RoboArm.jpg)
 
-Requirements:   
+## Requirements:   
 
 -Arduino MKR 1010 wifi   
 -OWI-35 robot arm   
@@ -18,6 +18,7 @@ Add SSID.h with your ssid information:
 #define KEY       "Your gateway WPA pass"   
 ```
 
+## Intro
 
 Based on  [OWI-535 building kit](https://owirobot.com/robotic-arm-edge/)   
     with 5 small dc motors and grearing trains, having total 4 degrees on freedom:   
@@ -28,10 +29,9 @@ Based on  [OWI-535 building kit](https://owirobot.com/robotic-arm-edge/)
 - shoulder base 180°  (api limits range between -4800...4800, home position 0)  
 
 Each motor keeps track about it's previous movements trying to avoid a joint running ower it's allowed range of motion.
-motion trackking is based on duration in milliseconds moved away from upright position (0-pos), where down and ccw are consideres as negative milliseconds.  
+motion trackking is based on duration in milliseconds moved away from home position (0-pos), where down and ccw are consideres as negative milliseconds.  
 after each execution que, the robot arm will return to it's homing position.  
 
-It is a sand box implementation, operating in a single room. It simulates Robot network collaborational functions".
 
 ## How to communicate with robot
 
