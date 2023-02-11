@@ -57,6 +57,9 @@ Or with their combinations to run move several joints at the same time:
 /shoulder/rotate/1000/elbow/1000/wrist/1000/pinch/1000
 
 ```
+/homepos and /lightning -actions cannot be concatenated in combination row and each motor/movement can exist only once in a single row.   
+
+All motions are relative to current position. However, if a motion exceeds the pre-defined bounds, the move is limited to bound value. It is up to user to keep track of absolute transitions of each motor.    
 
 Once the robot has completed the given seqvence (no more  rows in current project on server), server responses with special 'seqvence end' -action to robot:     
 
