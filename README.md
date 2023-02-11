@@ -69,7 +69,7 @@ Once the robot has completed the given seqvence (no more  rows in current projec
 HTTP POST /robot/[device-id]/seq/1/end   
 ```
 
-Server then checks if there are more seqvences (Projects) in que and push next project into execution (if available).
+Server then checks if there are more seqvences (Projects) in que and push next project into execution (if available).   
 This protocol is required for keeping http GET -actions to be immutable, but it also allows Robot to enter a manual command mode (receiving manually triggered actions and not switching into next project during manual mode), if robot has /manual -defined in it's api an feature set.  
 
 
