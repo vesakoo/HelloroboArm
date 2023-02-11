@@ -32,6 +32,8 @@ Each motor keeps track about it's previous movements trying to avoid a joint run
 motion trackking is based on duration in milliseconds moved away from home position (0-pos), where down and ccw are consideres as negative milliseconds.  
 after each execution que, the robot arm will return to it's homing position.  
 
+## Demo implementation
+[MyRo web robot controller](https://robo.sukelluspaikka.fi)
 
 ## How to communicate with robot
 
