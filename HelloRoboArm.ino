@@ -286,7 +286,7 @@ void lightning(bool on){
 void motorsHoming(){
     for (int i = 0; i < 5; i++){
       int mPos = motorpos[i][1] * -1;
-      motorRun(motorpos[i][2],motorpos[i][3],motorpos[i][0],mPos);
+      motorRun(motorpos[i][PINM1],motorpos[i][PINM2],motorpos[i][PINPWM],mPos);
 
     }
     lastRunTime = lastWakeUpTime + millis();
@@ -409,7 +409,9 @@ void loop() {
     }else if (strcmp(ptr,"light")==0){
       ptr = strtok(NULL, "/");
       lightning(strcmp(ptr,"on") == 0); 
-    } 
+    }else if(strcmp(ptr,"homepos")==0){
+      motorsHoming();
+    }
     ptr = strtok(NULL, "/"); 
     //break;
   }
@@ -421,7 +423,7 @@ void loop() {
     }
   }
   if(action.endsWith("/seq/end")){
-    //log("sequence end catched!");
+    log("sequence end catched!");
     if(!seqEndReported){
         postSeqEnd();
         seqEndReported = true;
