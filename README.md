@@ -72,7 +72,7 @@ HTTP POST /robot/[device-id]/seq/1/end
 ```
 
 Server then checks if there are more seqvences (Projects) in que and push next project into execution (if available).   
-This protocol is required for keeping http GET -actions to be immutable, but it also allows Robot to enter a manual command mode (receiving manually triggered actions and not switching into next project during manual mode), if robot has /manual -defined in it's api an feature set.  
+This protocol is required for keeping http GET -actions to be immutable, but it also allows Robot to enter into manual mode (receiving manually triggered actions and not switching next project into execution after commands in active project runs out). Manual mode -actions requires that it is defined in robots api and supportted feature set (for example action /manual ).  
 
 
 
