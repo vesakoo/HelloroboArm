@@ -49,9 +49,28 @@ Server should responce with one of these actions (text/plain):
 
 ```
 
-Or with their combinations to run move several joints at the same time:
+Or with their combinations to run move several joints at the same time:   
 
 ```
 /shoulder/rotate/1000/elbow/1000/wrist/1000/pinch/1000
 
 ```
+
+Once the robot has completed the given seqvence (no more  rows in current project on server), server send special seqvence end -action to robot:     
+
+```
+/seq/end
+
+```
+
+ Robot acknowledges the server that it has received this message:   
+
+```
+HTTP POST /robot/[device-id]/seq/1/end   
+```
+
+Server then checks if there are more seqvences (Projects) in que and push next project into execution (if available).
+This protocol is required for keeping http GET -actions to be immutable, but it also allows Robot to enter a manual command mode (receiving manually triggered actions and not switching into next project during manual mode), if robot has /manual -defined in it's api an feature set.  
+
+
+
