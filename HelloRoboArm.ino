@@ -28,7 +28,7 @@ bool seqEndReported = false;
 //last Runtime for deep sleep:
 char deviceId [] = "cda-dca-abc";
 unsigned long lastRunTime =0l;
-unsigned long lastSleepTime =0l;
+unsigned long lastWakeUpTime =0l;
 
 
 const byte STNDBY=9;
@@ -225,7 +225,7 @@ void motorRun( byte pin1,byte pin2,byte pwmpin, int dur){
   digitalWrite(pin1,LOW);
   digitalWrite(pin2,LOW);
   digitalWrite(STNDBY,LOW);
-  lastRunTime = millis();
+  lastRunTime = lastWakeUpTime+ millis();
 }
 
 void multiMotorRun(int durShldRot,int durShld,int durElb,int durWrist,int durPinch){
@@ -271,6 +271,7 @@ void multiMotorRun(int durShldRot,int durShld,int durElb,int durWrist,int durPin
     digitalWrite(motorpos[i][PINM2],LOW); 
   }
   digitalWrite(STNDBY,LOW);
+  lastRunTime = lastWakeUpTime + millis();
 }
 
 void lightning(bool on){
@@ -279,7 +280,7 @@ void lightning(bool on){
   }else{
     analogWrite(SPOT,0);
   }
-  lastRunTime = millis(); 
+  lastRunTime = lastWakeUpTime + millis(); 
 }
 
 void motorsHoming(){
@@ -288,6 +289,7 @@ void motorsHoming(){
       motorRun(motorpos[i][2],motorpos[i][3],motorpos[i][0],mPos);
 
     }
+    lastRunTime = lastWakeUpTime + millis();
 }
 
 //low power interrupt
@@ -332,13 +334,13 @@ void setup() {
 
 
 void loop() {
-
+  WiFi.noLowPowerMode();
   String s = "/robot/" + (String)deviceId +"/action/"+(String)actionNum;
   log(s);
   client.get(s);
   int statusCode = client.responseStatusCode();
   String action = client.responseBody();
-  //WiFi.lowPowerMode();
+  WiFi.lowPowerMode();
   //send =false;
   Serial.println("<Loop Action is:" +action +">");
   int str_len = action.length() + 1; 
@@ -419,7 +421,7 @@ void loop() {
     }
   }
   if(action.endsWith("/seq/end")){
-    log("sequence end catched!");
+    //log("sequence end catched!");
     if(!seqEndReported){
         postSeqEnd();
         seqEndReported = true;
@@ -435,36 +437,36 @@ void loop() {
 
     //if seq/end many times, goto sleep for a while
     unsigned long now = millis();
-    /*if(now<lastSleepTime){
-      now = lastSleepTime+now;
+    if(now<lastWakeUpTime){
+      now = lastWakeUpTime+now; //now will go out of bounds in 46 days...
     }
     if (now > lastRunTime + SLEEP_120S_AFTER ){
      log("LOW POWER 120S");
-     lastSleepTime =now +120000;
+     lastWakeUpTime =now +120000;
      LowPower.sleep(120000);
-     lastRunTime = now - SLEEP_120S_AFTER; 
+     lastRunTime = now - SLEEP_120S_AFTER; //so that lastRuntime dont go out of bounds
     }
     else if(now > lastRunTime + SLEEP_60S_AFTER  ){
       log("LOW POWER 60S");
-      lastSleepTime =now +60000;
+      lastWakeUpTime =now +60000;
       LowPower.sleep(60000);
     }
     else if(now > lastRunTime + SLEEP_30S_AFTER  ){
       log("LOW POWER 30S");
-      lastSleepTime =now + 30000;
+      lastWakeUpTime =now + 30000;
       LowPower.sleep(30000);
     }
     else if(now > lastRunTime + SLEEP_15S_AFTER  ){
       log("LOW POWER 15S");
-      lastSleepTime =now +15000;
+      lastWakeUpTime =now +15000;
       LowPower.sleep(15000);
     }
-    else if(now > lastRunTime + SLEEP_10S_AFTER  ){
+    else if(now > lastRunTime + SLEEP_10S_AFTER  ){ //after 3 mins of idling sleep a second
       log("LOW POWER 10S");
-      lastSleepTime =now + 10000;
+      lastWakeUpTime =now + 10000;
       LowPower.sleep(10000);
 
-    }*/
+    }
   
 
 }
