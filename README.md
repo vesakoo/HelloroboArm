@@ -58,7 +58,7 @@ Or with their combinations to run move several joints at the same time:
 
 ```
 
-Once the robot has completed the given seqvence (no more  rows in current project on server), server send special seqvence end -action to robot:     
+Once the robot has completed the given seqvence (no more  rows in current project on server), server responses with special 'seqvence end' -action to robot:     
 
 ```
 /seq/end
