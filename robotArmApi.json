@@ -1,0 +1,142 @@
+[
+  {
+    "cmd": "/shoulder/rotate/1000",
+    "label": "shoulder cw",
+    "description": "Rotate shoulder clockwise 1 second"
+  },
+  {
+    "cmd": "/shoulder/rotate/-1000",
+    "label": "shoulder ccw",
+    "description": "Rotate shoulder clockwise 1 second"
+  },
+  {
+    "cmd": "/shoulder/updown/1000",
+    "label": "shoulder up",
+    "description": "Lift shoulder  1 seconds"
+  },
+  {
+    "cmd": "/shoulder/updown/-1000",
+    "label": "shoulder down",
+    "description": "Lower shoulder 1 seconds"
+  },
+  {
+    "cmd": "/elbow/1000",
+    "label": "elbow up",
+    "description": "lift elbow 1 second"
+  },
+  {
+    "cmd": "/elbow/-1000",
+    "label": "elbow down",
+    "description": "lower elbow 1 second"
+  },
+  {
+    "cmd": "/wrist/1000",
+    "label": "wrist up",
+    "description": "lift wrist 1 second"
+  },
+  {
+    "cmd": "/wrist/-1000",
+    "label": "wrist down",
+    "description": "lower wrist 1 second"
+  },
+  {
+    "cmd": "/pinch/1000",
+    "label": "pinch",
+    "description": "close gripper 1 second"
+  },
+  {
+    "cmd": "/pinch/-1000",
+    "label": "unpinch",
+    "description": "open gripper 1 second"
+  },
+  {
+    "cmd": "/homepos",
+    "label": "home",
+    "description": "Move all to home position"
+  },
+  {
+    "cmd": "/light/on",
+    "label": "light on",
+    "description": "open gripper 1 second"
+  },
+  {
+    "cmd": "/light/off",
+    "label": "light off",
+    "description": "open gripper 1 second"
+  },
+  {
+    "cmd": "/shoulder/rotate/{dur}",
+    "label": "shoulder rot",
+    "description": "Rotate shoulder {dur} milliseconds",
+    "params": [
+      {
+        "id": "dur",
+        "type": "integer",
+        "default": 1000,
+        "min": -5000,
+        "max": 5000,
+        "label": "duration"
+      }
+    ]
+  },
+  {
+    "cmd": "/shoulder/updown/{dur}",
+    "label": "shoulder lift",
+    "description": "Lift shoulder up or down {dur} milliseconds. negative value is down",
+    "params": [
+      {
+        "id": "dur",
+        "type": "integer",
+        "default": 1000,
+        "min": -4800,
+        "max": 4800,
+        "label": "duration"
+      }
+    ]
+  },
+  {
+    "cmd": "/elbow/{dur}",
+    "label": "elbow lift",
+    "description": "Lift elbow up or down {dur} milliseconds. negative value is down",
+    "params": [
+      {
+        "id": "dur",
+        "type": "integer",
+        "default": 1000,
+        "min": -7800,
+        "max": 7800,
+        "label": "duration"
+      }
+    ]
+  },
+  {
+    "cmd": "/wrist/{dur}",
+    "label": "wrist lift",
+    "description": "Lift wrist up or down {dur} milliseconds. negative value is down",
+    "params": [
+      {
+        "id": "dur",
+        "type": "integer",
+        "default": 1000,
+        "min": -2800,
+        "max": 2800,
+        "label": "duration"
+      }
+    ]
+  },
+  {
+    "cmd": "/pinch/{dur}",
+    "label": "pinch",
+    "description": "open or close pinch {dur} milliseconds. negative value is open",
+    "params": [
+      {
+        "id": "dur",
+        "type": "integer",
+        "default": 1000,
+        "min": -2000,
+        "max": 2000,
+        "label": "duration"
+      }
+    ]
+  }
+]
